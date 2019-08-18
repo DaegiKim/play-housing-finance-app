@@ -7,7 +7,29 @@
     - H2 Database (In-Memory) 
     - sbt
 
+- 문제 해결 전략
+	- 
+
 ---
+
+# 설치 및 실행 방법 (Install & Usage)
+```bash
+# sbt가 없다면 먼저 설치해주세요.
+$ brew install sbt@1
+
+# 프로젝트를 내려 받습니다.
+$ git clone https://github.com/DaegiKim/play-housing-finance-app.git
+
+# 프로젝트 디렉토리로 이동합니다.
+$ cd play-housing-finance-app
+
+# 프로젝트를 실행합니다.
+$ sbt run
+```
+서비스가 정상적으로 구동 되면 http://localhost:9000 으로 접속이 가능합니다.
+
+---
+
 # API 명세서
 
 ## 1. JWT(Json Web Token) 기능
