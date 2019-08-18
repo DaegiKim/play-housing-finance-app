@@ -36,12 +36,12 @@ Content-Type: application/json
   "expires_in": "Sun Aug 18 21:37:16 KST 2019"
 }
 ```
-####[Error]
+#### [Error]
 > WIP
 
 ### 로그인 (signIn) 
 > signin 로그인 API: 입력으로 생성된 계정 (ID, PW)으로 로그인 요청하면 토큰을 발급한다.
-####[Request]
+#### [Request]
 ```http
 POST /api/auth/signin HTTP/1.1
 Host: localhost:9000
@@ -52,7 +52,7 @@ Content-Type: application/json
 	"password":"1234"
 }
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -63,18 +63,18 @@ Content-Type: application/json
   "expires_in": "Sun Aug 18 21:48:14 KST 2019"
 }
 ```
-####[Error]
+#### [Error]
 > WIP
 
 ### 토큰 갱신 (refresh) 
 > refresh 토큰 재발급 API: 기존에 발급받은 토큰을 Authorization 헤더에 "Bearer Token"으로 입력 요청을 하면 토큰을 재발급한다.
-####[Request]
+#### [Request]
 ```http
 PUT /api/auth/refresh HTTP/1.1
 Host: localhost:9000
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkNTRMQUNDaThyRDlDc2hjelpLWU1TdTFHSXpqL1BkTVUyZ0kvbmhzcVhDWHhTNXB3RUNRNS4iLCJpYXQiOjE1NjYxMzE4OTQsImV4cCI6MTU2NjEzMjQ5NH0.sjOoNfSEifTAN2bQY3Ot6ds9aBPBKDd2YQOIEQVATIM
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -85,33 +85,33 @@ Content-Type: application/json
   "expires_in": "Sun Aug 18 21:50:29 KST 2019"
 }
 ```
-####[Error]
+#### [Error]
 > WIP
 
 ## 2. 주택금융 공급현황 분석 서비스
 
 ### 데이터 파일에서 각 레코드를 데이터베이스에 저장하는 API 개발
-####[Request]
+#### [Request]
 ```http
 POST /api/init HTTP/1.1
 Host: localhost:9000
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkNTRMQUNDaThyRDlDc2hjelpLWU1TdTFHSXpqL1BkTVUyZ0kvbmhzcVhDWHhTNXB3RUNRNS4iLCJpYXQiOjE1NjYxMzMxMjcsImV4cCI6MTU2NjEzMzcyN30.Bz9vhzhnPiePmWJcyfV4hSvhWonDNEED7tJrXduDEiA
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 ```
-####[Error]
+#### [Error]
 > WIP
 
 ### 주택금융 공급 금융기관(은행) 목록을 출력하는 API 를 개발하세요.
-####[Request]
+#### [Request]
 ```http
 GET /api/finance/list HTTP/1.1
 Host: localhost:9000
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkTDYxdU9ieTBIRkVkOVNCOWs1US5qdWVINjJkRWFhYlRzN0dLbXdyYS9IWmJBOG8yMWlHY0MiLCJpYXQiOjE1NjYxMzMzMDMsImV4cCI6MTU2NjEzMzkwM30.JX4uAInBUzr0r7Sw8gNat_U6pcYuojfuo3axKy7yetA
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -132,17 +132,17 @@ Content-Type: application/json
   }
 ]
 ```
-####[Error]
+#### [Error]
 > WIP
 
 ### 년도별 각 금융기관의 지원금액 합계를 출력하는 API 를 개발하세요.
-####[Request]
+#### [Request]
 ```http
 GET /api/finance/summary-by-yearly HTTP/1.1
 Host: localhost:9000
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkTDYxdU9ieTBIRkVkOVNCOWs1US5qdWVINjJkRWFhYlRzN0dLbXdyYS9IWmJBOG8yMWlHY0MiLCJpYXQiOjE1NjYxMzM1MjcsImV4cCI6MTU2NjEzNDEyN30.96lR6PdCT-WArI-JUeG9ioKeOj-hVSO72u2A8SwU-2o
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -184,17 +184,17 @@ Content-Type: application/json
   ]
 }
 ```
-####[Error]
+#### [Error]
 > WIP
 
 ###각 년도별 각 기관의 전체 지원금액 중에서 가장 큰 금액의 기관명을 출력하는 API 개발
-####[Request]
+#### [Request]
 ```http
 GET /api/finance/maximum-by-yearly HTTP/1.1
 Host: localhost:9000
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkTDYxdU9ieTBIRkVkOVNCOWs1US5qdWVINjJkRWFhYlRzN0dLbXdyYS9IWmJBOG8yMWlHY0MiLCJpYXQiOjE1NjYxMzM2NzcsImV4cCI6MTU2NjEzNDI3N30.xQ2p40oe0OQtiA-q1t_fNJt7cgwCsopz20cW_BKSbrc
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -204,11 +204,11 @@ Content-Type: application/json
   "bank": "주택도시기금"
 }
 ```
-####[Error]
+#### [Error]
 > WIP
 
-###전체 년도(2005 ~ 2016)에서 ~~외환은행~~ 특정은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액을 출력하는 API 개발
-####[Request]
+### 전체 년도(2005 ~ 2016)에서 ~~외환은행~~ 특정은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액을 출력하는 API 개발
+#### [Request]
 ```http
 GET /api/finance/max-min-by-yearly HTTP/1.1
 Host: localhost:9000
@@ -219,7 +219,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc
 	"bank":"외환은행"
 }
 ```
-####[Response]
+#### [Response]
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -238,13 +238,13 @@ Content-Type: application/json
   ]
 }
 ```
-####[Error]
+#### [Error]
 > WIP
 
-###특정 은행의 특정 달에 대해서 2018년도 해당 달에 금융지원 금액을 예측하는 API 개발
-####[Request]
-####[Response]
-####[Error]
+### 특정 은행의 특정 달에 대해서 2018년도 해당 달에 금융지원 금액을 예측하는 API 개발
+#### [Request]
+#### [Response]
+#### [Error]
 > WIP
 
 # WIP ...
