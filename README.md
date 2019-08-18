@@ -187,7 +187,7 @@ Content-Type: application/json
 #### [Error]
 > WIP
 
-###각 년도별 각 기관의 전체 지원금액 중에서 가장 큰 금액의 기관명을 출력하는 API 개발
+### 각 년도별 각 기관의 전체 지원금액 중에서 가장 큰 금액의 기관명을 출력하는 API 개발
 #### [Request]
 ```http
 GET /api/finance/maximum-by-yearly HTTP/1.1
