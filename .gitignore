@@ -1,0 +1,8 @@
+/.g8
+/.idea
+/.idea_modules
+/project/project
+/project/target
+/target
+/logs/
+.DS_Store

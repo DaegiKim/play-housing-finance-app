@@ -1,0 +1,27 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# An example controller showing a sample home page
+GET     /                           controllers.HomeController.index
+
+POST    /api/init                   controllers.FinanceController.init
+
+POST    /api/auth/signup            controllers.AccountController.signUp(request: Request)
+POST    /api/auth/signin            controllers.AccountController.signIn(request: Request)
+PUT     /api/auth/refresh           controllers.AccountController.refresh(request: Request)
+
+# 주택금융 공급 금융기관(은행) 목록을 출력하는 API 를 개발하세요.
+GET     /api/finance/list                   controllers.FinanceController.bankList
+
+# 년도별 각 금융기관의 지원금액 합계를 출력하는 API 를 개발하세요.
+GET     /api/finance/summary-by-yearly      controllers.FinanceController.getSummaryByYearly
+
+# 각 년도 별 각 기관의 전체 지원 금액 중에서 가장 큰 금액의 기관명을 출력하는 API 개발
+GET     /api/finance/maximum-by-yearly      controllers.FinanceController.getMaximumByYearly
+
+# 전체 년도(2005~2016)에서 외환은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액을 출력하는 API 개발
+GET     /api/finance/max-min-by-yearly      controllers.FinanceController.getMaxMinByYearly(request: Request)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

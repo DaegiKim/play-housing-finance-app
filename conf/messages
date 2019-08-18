@@ -1,0 +1,4 @@
+error.auth.token.default=Invalid token
+error.auth.token.expired=Expired token
+error.auth.token.invalid_signature=Invalid token with wrong signature
+error.auth.username.invalid=username "{0}" does not exist
