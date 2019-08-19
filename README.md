@@ -8,7 +8,10 @@
     - sbt
 
 - 문제 해결 전략
-	- 
+	- CSV 파일에 저장된 RAW 데이터를 읽어들여, 금융 기관 목록을 저장하는 Bank 테이블을 기준으로 기관의 월별 지원 금액을 저장하는 Finance 테이블로의 One-To-Many 관계를 가지도록 함.
+	- 주어진 문제를 해결함에 있어 복잡한 SQL Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산 하도록 구현.
+	- 인증을 위해 JWT을 구현하는 부분은 오픈소스 [jjwt](https://github.com/jwtk/jjwt)와 Play Framework의 기능인 [Action composition](https://www.playframework.com/documentation/2.7.x/JavaActionsComposition)기능을 적용해 해결.
+	- WIP...
 
 ---
 
