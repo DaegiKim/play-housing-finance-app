@@ -1,10 +1,12 @@
 package models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import exceptions.FinanceRuntimeException;
 import io.ebean.Finder;
 import io.ebean.Model;
+import org.apache.commons.collections.map.CompositeMap;
 import play.libs.Json;
 
 import javax.persistence.*;
@@ -24,7 +26,7 @@ public class Bank extends Model {
     public String name;
 
     @OneToMany
-    @JsonIgnore
+    @JsonManagedReference
     public List<Finance> finances;
 
     public static ArrayNode getBankList() {
@@ -70,29 +72,72 @@ public class Bank extends Model {
         return result;
     }
 
+    public static ObjectNode getSummaryByYearly() {
+        ObjectNode resultNode = Json.newObject();
+        resultNode.put("name", "주택금융 공급현황");
+
+        ArrayNode dataArrayNode = Json.newArray();
+        resultNode.set("data", dataArrayNode);
+
+        List<Bank> banks = find.all();
+
+        Map<Integer, Map<String, Long>> map = new TreeMap<>(Integer::compareTo);
+
+        for (Bank bank : banks) {
+            Map<Integer, Long> collect = bank.finances.stream().collect(Collectors.groupingBy(x -> x.year, Collectors.summingLong(x -> x.amount)));
+            collect.forEach((k,v)-> map.merge(k, new HashMap<String, Long>(){{put(bank.name, v);}}, CompositeMap::new));
+        }
+
+        for (Map.Entry<Integer, Map<String, Long>> entry : map.entrySet()) {
+            ObjectNode yearNode = Json.newObject();
+            ObjectNode detailAmount = Json.newObject();
+
+            yearNode.put("year", entry.getKey()+"년");
+
+            Map<String, Long> yearMap = entry.getValue();
+
+            long sum = yearMap.values().stream().mapToLong(x->x).sum();
+
+            yearNode.put("total_amount", sum);
+            yearMap.forEach(detailAmount::put);
+            yearNode.set("detail_amount", detailAmount);
+
+            dataArrayNode.add(yearNode);
+        }
+
+        return resultNode;
+    }
+
     public static ObjectNode getMaxMinByYearly(String name) {
         ObjectNode resultNode = Json.newObject();
         resultNode.put("bank", name);
 
         Bank bank = Bank.find.query().where().eq("name", name).findOne();
 
+        if(bank==null)
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.BANK_NOT_FOUND);
+
         List<Finance> finances = Finance.find.query().where().eq("bank_id", bank.id).findList();
 
         Map<Integer, Long> collect = finances.stream().collect(Collectors.groupingBy(x -> x.year, Collectors.summingLong(x -> x.amount)));
 
-        Map.Entry<Integer, Long> max = collect.entrySet().stream().max(Comparator.comparingLong(Map.Entry::getValue)).get();
-        Map.Entry<Integer, Long> min = collect.entrySet().stream().min(Comparator.comparingLong(Map.Entry::getValue)).get();
+        List<Map.Entry<Integer, Long>> sorted = collect.entrySet().stream().sorted(Comparator.comparingLong(Map.Entry::getValue)).collect(Collectors.toList());
+
+        Map.Entry<Integer, Long> min = sorted.get(0);
+        Map.Entry<Integer, Long> max = sorted.get(sorted.size()-1);
 
         ArrayNode supportAmount = Json.newArray();
+
         supportAmount.add(
                 Json.newObject()
                         .put("year", max.getKey())
-                        .put("amount", BigDecimal.valueOf(max.getValue()).divide(BigDecimal.valueOf(12), 0, BigDecimal.ROUND_HALF_UP))
+                        .put("amount", BigDecimal.valueOf(max.getValue()).divide(BigDecimal.valueOf(12), 0, BigDecimal.ROUND_HALF_UP).longValue())
         );
+
         supportAmount.add(
                 Json.newObject()
                         .put("year", min.getKey())
-                        .put("amount", BigDecimal.valueOf(min.getValue()).divide(BigDecimal.valueOf(12), 0, BigDecimal.ROUND_HALF_UP))
+                        .put("amount", BigDecimal.valueOf(min.getValue()).divide(BigDecimal.valueOf(12), 0, BigDecimal.ROUND_HALF_UP).longValue())
         );
 
         resultNode.set("support_amount", supportAmount);

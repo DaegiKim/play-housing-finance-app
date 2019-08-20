@@ -3,19 +3,19 @@
 
 - 개발환경
     - Java 1.8 +
-    - Play Framework(2.7.3, Java)
+    - Play Framework 2.7.3 (Java)
     - H2 Database (In-Memory) 
     - sbt
 
 - 문제 해결 전략
-	- CSV 파일에 저장된 RAW 데이터를 읽어들여, 금융 기관 목록을 저장하는 Bank 테이블을 기준으로 기관의 월별 지원 금액을 저장하는 Finance 테이블로의 One-To-Many 관계를 가지도록 함.
-	- 주어진 문제를 해결함에 있어 복잡한 SQL Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산 하도록 구현.
+	- 금융 기관 목록을 저장하는 Bank 테이블, 기관의 월별 지원 금액을 저장하는 Finance 테이블을 정의하고, 두 테이블이 One-To-Many 관계를 가지도록 함. (하나의 Bank는 다수의 Finance를 가진다.)
+	- 주어진 문제를 해결함에 있어 복잡한 SQL Native Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산 하도록 구현.
 	- 인증을 위해 JWT을 구현하는 부분은 오픈소스 [jjwt](https://github.com/jwtk/jjwt)와 Play Framework의 기능인 [Action composition](https://www.playframework.com/documentation/2.7.x/JavaActionsComposition)기능을 적용해 해결.
-	- WIP...
+	- 선택 문제(지원금액 예측)에 대해서는 '과거의 데이터가 이후에도 영향을 미칠것이다'라는 가설을 세우고, 이를 간단하게 구현할 수 있는 시계열(time series)을 적용하기로 결정. 시계열을 Java로 구현한 오픈소스 라이브러리 [com.github.signaflo % timeseries % 0.4](https://github.com/signaflo/java-timeseries)를 사용하여 해결함.
 
 ---
 
-# 설치 및 실행 방법 (Install & Usage)
+# 설치 및 실행 방법 (How to install and run)
 ```bash
 # sbt가 없다면 먼저 설치해주세요.
 $ brew install sbt@1
@@ -61,8 +61,6 @@ Content-Type: application/json
   "expires_in": "Sun Aug 18 21:37:16 KST 2019"
 }
 ```
-#### [Error]
-> WIP
 
 ### 로그인 (signIn) 
 > signin 로그인 API: 입력으로 생성된 계정 (ID, PW)으로 로그인 요청하면 토큰을 발급한다.
@@ -88,8 +86,6 @@ Content-Type: application/json
   "expires_in": "Sun Aug 18 21:48:14 KST 2019"
 }
 ```
-#### [Error]
-> WIP
 
 ### 토큰 갱신 (refresh) 
 > refresh 토큰 재발급 API: 기존에 발급받은 토큰을 Authorization 헤더에 "Bearer Token"으로 입력 요청을 하면 토큰을 재발급한다.
@@ -110,8 +106,6 @@ Content-Type: application/json
   "expires_in": "Sun Aug 18 21:50:29 KST 2019"
 }
 ```
-#### [Error]
-> WIP
 
 ## 2. 주택금융 공급현황 분석 서비스
 
@@ -126,8 +120,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc
 ```http
 HTTP/1.1 200 OK
 ```
-#### [Error]
-> WIP
 
 ### 주택금융 공급 금융기관(은행) 목록을 출력하는 API 를 개발하세요.
 #### [Request]
@@ -157,8 +149,6 @@ Content-Type: application/json
   }
 ]
 ```
-#### [Error]
-> WIP
 
 ### 년도별 각 금융기관의 지원금액 합계를 출력하는 API 를 개발하세요.
 #### [Request]
@@ -209,8 +199,6 @@ Content-Type: application/json
   ]
 }
 ```
-#### [Error]
-> WIP
 
 ### 각 년도별 각 기관의 전체 지원금액 중에서 가장 큰 금액의 기관명을 출력하는 API 개발
 #### [Request]
@@ -229,8 +217,6 @@ Content-Type: application/json
   "bank": "주택도시기금"
 }
 ```
-#### [Error]
-> WIP
 
 ### 전체 년도(2005 ~ 2016)에서 ~~외환은행~~ 특정은행의 지원금액 평균 중에서 가장 작은 금액과 큰 금액을 출력하는 API 개발
 #### [Request]
@@ -263,13 +249,69 @@ Content-Type: application/json
   ]
 }
 ```
-#### [Error]
-> WIP
 
 ### 특정 은행의 특정 달에 대해서 2018년도 해당 달에 금융지원 금액을 예측하는 API 개발
 #### [Request]
+```http
+GET /api/finance/forecast HTTP/1.1
+Host: localhost:9000
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkTDYxdU9ieTBIRkVkOVNCOWs1US5qdWVINjJkRWFhYlRzN0dLbXdyYS9IWmJBOG8yMWlHY0MiLCJpYXQiOjE1NjYyODk1NDYsImV4cCI6MTU2NjI5MTM0Nn0.-Fld1qhJJXUuLNjK4jGPMe9DZicgGzIbZGwOW0oejZc
+
+{
+  "bank":"국민은행",
+  "month": 2
+}
+```
 #### [Response]
-#### [Error]
-> WIP
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "bank": 2,
+  "year": 2018,
+  "month": 2,
+  "amount": 3700
+}
+```
+
+## 3. 에러 메시지(Error Messages)
+| Error code | Error Message                | HTTP Status Code          | Detailed Infomation                                  |
+|------------|------------------------------|---------------------------|------------------------------------------------|
+| -1         | INVALID_PARAMETER            | 400 Bad Request           | 잘못된 파라미터로 요청 시 발생                |
+| -2         | USERNAME_DUPLICATE           | 400 Bad Request           | 중복된 username으로 가입 시도 시 발생         |
+| -3         | PASSWORD_NOT_EQUALS          | 400 Bad Request           | 잘못된 password로 로그인 시도 시 발생         |
+| -4         | ALREADY_REGISTERED_CSV_FILE  | 400 Bad Request           | CSV 파일 입력 중복 시도 시 발생                |
+| -101       | AUTH_TOKEN_INVALID           | 401 Unauthorized          | 잘못된 JWT 사용 시 발생                       |
+| -102       | AUTH_TOKEN_EXPIRED           | 401 Unauthorized          | 만료된  JWT 사용 시 발생                      |
+| -103       | AUTH_TOKEN_INVALID_SIGNATURE | 401 Unauthorized          | 서명이 올바르지 않은 JWT 사용 시 발생          |
+| -301       | USERNAME_NOT_FOUND           | 404 Not Found             | 존재하지 않는 username으로 로그인 시도 시 발생 |
+| -302       | BANK_NOT_FOUND               | 404 Not Found             | 존재하지 않는 금융기관 이름을 입력 시 발생     |
+| -401       | CSV_IO_EXCEPTION             | 500 Internal Server Error | CSV 입출력 과정에서 에러 발생 시               |
+
+#### [Sample request]
+```http
+GET /api/finance/max-min-by-yearly HTTP/1.1
+Host: localhost:9000
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkTDYxdU9ieTBIRkVkOVNCOWs1US5qdWVINjJkRWFhYlRzN0dLbXdyYS9IWmJBOG8yMWlHY0MiLCJpYXQiOjE1NjYyODk5ODMsImV4cCI6MTU2NjI5MTc4M30.sbhlUjiWTpYKGJUAIqO2DNa8nSol3RIfb1YTqloxthM
+
+{
+  "bank":"없는은행"
+}
+```
+#### [Sample response]
+```http
+HTTP/1.1 404 Not Found
+Date: Tue, 20 Aug 2019 08:33:16 GMT
+Content-Type: application/json
+Content-Length: 52
+
+{
+  "error_message": "BANK_NOT_FOUND",
+  "error_code": -302
+}
+```
 
 # WIP ...

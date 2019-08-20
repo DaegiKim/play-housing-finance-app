@@ -1,36 +1,32 @@
 package actions;
 
 import com.typesafe.config.Config;
+import exceptions.FinanceRuntimeException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
-import play.i18n.Lang;
-import play.i18n.Messages;
-import play.i18n.MessagesApi;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
-import utils.MessageApi;
 
 import javax.inject.Inject;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public class SecuredAction extends Action.Simple {
-    @Inject MessageApi messageApi;
-
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
-    @Inject Config config;
+
+    private Config config;
+
+    @Inject
+    SecuredAction(Config config) {
+        this.config = config;
+    }
 
     @Override
     public CompletionStage<Result> call(Http.Request req) {
-        String errorMsg = messageApi.getMessage("error.auth.token.default");
         if(req.header(HEADER_AUTHORIZATION).isPresent()) {
             String jwt = req.header(HEADER_AUTHORIZATION).get();
             jwt = jwt.replace(BEARER, "");
@@ -39,13 +35,14 @@ public class SecuredAction extends Action.Simple {
                 Claims claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
                 return delegate.call(req);
             } catch (MalformedJwtException ex) {
-                errorMsg = messageApi.getMessage("error.auth.token.default");
+                throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.AUTH_TOKEN_INVALID);
             } catch (SignatureException ex) {
-                errorMsg = messageApi.getMessage("error.auth.token.invalid_signature");
+                throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.AUTH_TOKEN_INVALID_SIGNATURE);
             } catch (ExpiredJwtException ex) {
-                errorMsg = messageApi.getMessage("error.auth.token.expired");
+                throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.AUTH_TOKEN_EXPIRED);
             }
         }
-        return CompletableFuture.completedFuture(unauthorized(errorMsg));
+
+        throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.AUTH_TOKEN_INVALID);
     }
 }

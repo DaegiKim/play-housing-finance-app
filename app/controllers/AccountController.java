@@ -2,49 +2,62 @@ package controllers;
 
 import actions.SecuredAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
-import io.jsonwebtoken.*;
+import exceptions.FinanceRuntimeException;
+import io.ebean.DuplicateKeyException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import models.User;
 import play.libs.Json;
 import play.mvc.*;
 import utils.BCrypt;
-import utils.MessageApi;
 
 import javax.inject.Inject;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Optional;
 
 public class AccountController extends Controller {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
 
-    @Inject MessageApi messageApi;
-    @Inject Config config;
+    private Config config;
+
+    @Inject
+    AccountController(Config config){
+        this.config = config;
+    }
 
     @BodyParser.Of(BodyParser.Json.class)
     public Result signUp(Http.Request request) {
         JsonNode jsonNode = request.body().asJson();
 
+        if(jsonNode==null || !jsonNode.hasNonNull("username") || !jsonNode.hasNonNull("password"))
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.INVALID_PARAMETER);
+
         String username = jsonNode.get("username").asText();
         String password = jsonNode.get("password").asText();
 
         User user = new User();
+
         user.username = username;
         user.password = BCrypt.hashpw(password, BCrypt.gensalt());
-        user.save();
+
+        try  {
+            user.save();
+        } catch (DuplicateKeyException ex) {
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.USERNAME_DUPLICATE);
+        }
 
         String jwt = generateJWT(user.username, user.password);
         Claims claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
 
-        ObjectNode result = Json.newObject();
-        result.put("accessToken", jwt);
-        result.put("issued_at", claims.getIssuedAt().toString());
-        result.put("expires_in", claims.getExpiration().toString());
-
-        return ok(result);
+        return ok(Json.newObject()
+                .put("accessToken", jwt)
+                .put("issued_at", claims.getIssuedAt().toString())
+                .put("expires_in", claims.getExpiration().toString())
+        );
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -56,70 +69,54 @@ public class AccountController extends Controller {
 
         User user = User.findByUsername(username);
 
-        if(user == null) {
-            return forbidden(messageApi.getMessage("error.auth.username.invalid", username));
-        } else if(!BCrypt.checkpw(password, user.password)) {
-            return forbidden("invalid password");
-        }
+        if(user == null)
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.USERNAME_NOT_FOUND);
+
+        if(!BCrypt.checkpw(password, user.password))
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.PASSWORD_NOT_EQUALS);
 
         String jwt = generateJWT(user.username, user.password);
         Claims claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
 
-        ObjectNode result = Json.newObject();
-        result.put("accessToken", jwt);
-        result.put("issued_at", claims.getIssuedAt().toString());
-        result.put("expires_in", claims.getExpiration().toString());
-
-        return ok(result);
+        return ok(Json.newObject()
+                .put("accessToken", jwt)
+                .put("issued_at", claims.getIssuedAt().toString())
+                .put("expires_in", claims.getExpiration().toString())
+        );
     }
 
     @With(SecuredAction.class)
     public Result refresh(Http.Request request) {
-        Optional<String> token = request.header(HEADER_AUTHORIZATION);
-        if(token.isPresent()) {
-            String jwt = token.get().replaceAll(BEARER, "");
+        String jwt = request.header(HEADER_AUTHORIZATION).get().replaceAll(BEARER, "");
+        Claims claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
 
-            Claims claims;
-            try {
-                claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
-            } catch (MalformedJwtException ex) {
-                return forbidden("invalid token");
-            } catch (ExpiredJwtException ex) {
-                return forbidden("expired token");
-            }
+        String username = claims.get("username", String.class);
+        String password = claims.get("password", String.class);
 
-            String username = claims.get("username", String.class);
-            String password = claims.get("password", String.class);
+        User user = User.findByUsername(username);
 
-            User user = User.findByUsername(username);
+        if(user == null || !user.username.equals(username) || !user.password.equals(password))
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.AUTH_TOKEN_INVALID);
 
-            if(user == null || !user.username.equals(username) || !user.password.equals(password)) {
-                return forbidden("invalid token");
-            }
+        jwt = generateJWT(user.username, user.password);
+        claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
 
-            jwt = generateJWT(user.username, user.password);
-            claims = Jwts.parser().setSigningKey(config.getString("play.http.secret.key")).parseClaimsJws(jwt).getBody();
-
-            ObjectNode result = Json.newObject();
-            result.put("accessToken", jwt);
-            result.put("issued_at", claims.getIssuedAt().toString());
-            result.put("expires_in", claims.getExpiration().toString());
-
-            return ok(result);
-        } else {
-            return forbidden("Please provide a token.");
-        }
+        return ok(Json.newObject()
+                .put("accessToken", jwt)
+                .put("issued_at", claims.getIssuedAt().toString())
+                .put("expires_in", claims.getExpiration().toString())
+        );
     }
 
     private String generateJWT(String username, String password) {
-        String jwt = Jwts.builder()
+        long expiresIn = config.getLong("app.auth.token.expires.in");
+
+        return Jwts.builder()
                 .claim("username", username)
                 .claim("password", password)
                 .setIssuedAt(new Date())
-                .setExpiration(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(10).toInstant()))
+                .setExpiration(Date.from(ZonedDateTime.now(ZoneId.systemDefault()).plusMinutes(expiresIn).toInstant()))
                 .signWith(SignatureAlgorithm.HS256, config.getString("play.http.secret.key"))
                 .compact();
-
-        return jwt;
     }
 }

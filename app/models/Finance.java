@@ -1,15 +1,16 @@
 package models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Functions;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.signaflo.timeseries.TimeSeries;
+import com.github.signaflo.timeseries.Ts;
+import com.github.signaflo.timeseries.forecast.Forecast;
+import com.github.signaflo.timeseries.model.arima.Arima;
+import com.github.signaflo.timeseries.model.arima.ArimaOrder;
 import com.opencsv.CSVReader;
+import exceptions.FinanceRuntimeException;
 import io.ebean.Finder;
 import io.ebean.Model;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.libs.Json;
 
 import javax.persistence.Entity;
@@ -20,16 +21,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Table(name = "finance")
 @Entity
 public class Finance extends Model {
-    final static Logger logger = LoggerFactory.getLogger("application");
-
     public static final Finder<Long, Finance> find = new Finder<>(Finance.class);
 
     @Id
@@ -41,10 +36,13 @@ public class Finance extends Model {
     public Long amount;
 
     @ManyToOne
+    @JsonBackReference
     public Bank bank;
 
-    public static void init() {
-        logger.debug("Finance: init()");
+    public static boolean init() {
+        List<Finance> finances = Finance.find.all();
+        if(finances.size() > 0)
+            return false;
 
         try(FileReader fileReader = new FileReader("app/resources/data.csv")) {
             CSVReader csvReader = new CSVReader(fileReader);
@@ -84,48 +82,38 @@ public class Finance extends Model {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.CSV_IO_EXCEPTION);
         }
+
+        return true;
     }
 
-    public static ObjectNode getSummaryByYearly() {
-        ObjectNode resultNode = Json.newObject();
-        resultNode.put("name", "주택금융 공급현황");
+    public static JsonNode getForecast(String bankName, int month) {
+        if(bankName == null || bankName.isEmpty() || month < 1 || month > 12)
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.INVALID_PARAMETER);
 
-        ArrayNode dataArrayNode = Json.newArray();
-        resultNode.set("data", dataArrayNode);
+        Bank bank = Bank.find.query().where().eq("name", bankName).findOne();
 
-        Map<Integer, Map<String, Long>> collect = find.all()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        x -> x.year,
-                        Collectors.groupingBy(
-                                x -> x.bank.name,
-                                Collectors.summingLong(
-                                        x -> x.amount
-                                )
-                        )
-                        )
-                );
+        if(bank==null)
+            throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.BANK_NOT_FOUND);
 
-        for (Map.Entry<Integer, Map<String, Long>> entry : collect.entrySet()) {
-            ObjectNode yearNode = Json.newObject();
-            ObjectNode detailAmount = Json.newObject();
+        List<Finance> finances = Finance.find.query().where().eq("bank_id", bank.id).findList();
 
-            yearNode.put("year", entry.getKey()+"년");
+        double[] financeArray = finances.stream().mapToDouble(x -> Double.valueOf(x.amount)).toArray();
 
-            Map<String, Long> yearMap = entry.getValue();
+        TimeSeries timeSeries = Ts.newMonthlySeries(2005,1, financeArray);
 
-            long sum = yearMap.values().stream().mapToLong(x->x).sum();
+        ArimaOrder modelOrder = ArimaOrder.order(0, 1, 1, 0, 1, 1);
 
-            yearNode.put("total_amount", sum);
-            yearMap.forEach(detailAmount::put);
-            yearNode.set("detail_amount", detailAmount);
+        Arima model = Arima.model(timeSeries, modelOrder);
 
-            dataArrayNode.add(yearNode);
-        }
+        Forecast forecast = model.forecast(14);
+        List<Double> forecastList = forecast.pointEstimates().asList();
 
-
-        return resultNode;
+        return Json.newObject()
+                .put("bank", bank.id)
+                .put("year", 2018)
+                .put("month", month)
+                .put("amount", forecastList.get(1+month).intValue());
     }
 }
