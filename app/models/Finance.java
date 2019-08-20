@@ -1,7 +1,7 @@
 package models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.signaflo.timeseries.TimeSeries;
 import com.github.signaflo.timeseries.Ts;
 import com.github.signaflo.timeseries.forecast.Forecast;
@@ -88,7 +88,7 @@ public class Finance extends Model {
         return true;
     }
 
-    public static JsonNode getForecast(String bankName, int month) {
+    public static ObjectNode getForecast(String bankName, int month) {
         if(bankName == null || bankName.isEmpty() || month < 1 || month > 12)
             throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.INVALID_PARAMETER);
 
@@ -97,9 +97,7 @@ public class Finance extends Model {
         if(bank==null)
             throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.BANK_NOT_FOUND);
 
-        List<Finance> finances = Finance.find.query().where().eq("bank_id", bank.id).findList();
-
-        double[] financeArray = finances.stream().mapToDouble(x -> Double.valueOf(x.amount)).toArray();
+        double[] financeArray = bank.finances.stream().mapToDouble(x -> Double.valueOf(x.amount)).toArray();
 
         TimeSeries timeSeries = Ts.newMonthlySeries(2005,1, financeArray);
 
