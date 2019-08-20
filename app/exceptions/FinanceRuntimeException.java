@@ -39,6 +39,7 @@ public class FinanceRuntimeException extends RuntimeException {
     private ErrorCode errorCode;
 
     public FinanceRuntimeException(ErrorCode errorCode) {
+        super(errorCode.name());
         this.errorCode = errorCode;
     }
 
