@@ -14,7 +14,7 @@ import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AccountControllerTest  {
+public class UserControllerTest {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
 

@@ -12,21 +12,24 @@ import models.User;
 import org.mindrot.jbcrypt.BCrypt;
 import play.libs.Json;
 import play.mvc.*;
+import services.UserService;
 
 import javax.inject.Inject;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-public class AccountController extends Controller {
+public class UserController extends Controller {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
 
-    private Config config;
+    private final UserService userService;
+    private final Config config;
 
     @Inject
-    AccountController(Config config){
+    UserController(Config config, UserService userService){
         this.config = config;
+        this.userService = userService;
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -67,7 +70,7 @@ public class AccountController extends Controller {
         String username = jsonNode.get("username").asText();
         String password = jsonNode.get("password").asText();
 
-        User user = User.findByUsername(username);
+        User user = userService.findByUsername(username);
 
         if(user == null)
             throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.USERNAME_NOT_FOUND);
@@ -93,7 +96,7 @@ public class AccountController extends Controller {
         String username = claims.get("username", String.class);
         String password = claims.get("password", String.class);
 
-        User user = User.findByUsername(username);
+        User user = userService.findByUsername(username);
 
         if(user == null || !user.username.equals(username) || !user.password.equals(password))
             throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.AUTH_TOKEN_INVALID);

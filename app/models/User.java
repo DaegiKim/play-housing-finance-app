@@ -21,8 +21,4 @@ public class User extends Model {
 
     @Constraints.Required
     public String password;
-
-    public static User findByUsername(String usenrame) {
-        return find.query().where().eq("username", usenrame).findOne();
-    }
 }

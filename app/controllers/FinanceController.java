@@ -3,30 +3,41 @@ package controllers;
 import actions.SecuredAction;
 import com.fasterxml.jackson.databind.JsonNode;
 import exceptions.FinanceRuntimeException;
-import models.Bank;
-import models.Finance;
 import play.libs.Json;
 import play.mvc.*;
+import services.BankService;
+import services.FinanceService;
+
+import javax.inject.Inject;
 
 @With(SecuredAction.class)
 public class FinanceController extends Controller {
+    private final FinanceService financeService;
+    private final BankService bankService;
+
+    @Inject
+    FinanceController(FinanceService financeService, BankService bankService) {
+        this.financeService = financeService;
+        this.bankService = bankService;
+    }
+
     public Result init() {
-        if(Finance.init())
+        if(financeService.init())
             return ok(Json.newObject().put("message", "succeed"));
         else
             throw new FinanceRuntimeException(FinanceRuntimeException.ErrorCode.ALREADY_REGISTERED_CSV_FILE);
     }
 
     public Result bankList() {
-        return ok(Bank.getBankList());
+        return ok(bankService.getBankList());
     }
 
     public Result getSummaryByYearly() {
-        return ok(Bank.getSummaryByYearly());
+        return ok(bankService.getSummaryByYearly());
     }
 
     public Result getMaximumByYearly() {
-        return ok(Bank.getMaximumByYearly());
+        return ok(bankService.getMaximumByYearly());
     }
 
     @BodyParser.Of(BodyParser.Json.class)
@@ -38,7 +49,7 @@ public class FinanceController extends Controller {
 
         String bank = jsonNode.get("bank").asText();
 
-        return ok(Bank.getMaxMinByYearly(bank));
+        return ok(bankService.getMaxMinByYearly(bank));
     }
 
     public Result getForecast(Http.Request request) {
@@ -46,6 +57,6 @@ public class FinanceController extends Controller {
         String bankName = jsonNode.get("bank").asText();
         int month = jsonNode.get("month").asInt();
 
-        return ok(Finance.getForecast(bankName, month));
+        return ok(financeService.getForecast(bankName, month));
     }
 }

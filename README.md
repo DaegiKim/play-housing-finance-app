@@ -112,7 +112,7 @@ Content-Type: application/json
 ### 데이터 파일에서 각 레코드를 데이터베이스에 저장하는 API 개발
 #### [Request]
 ```http
-POST /api/init HTTP/1.1
+POST /api/finance/init HTTP/1.1
 Host: localhost:9000
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkNTRMQUNDaThyRDlDc2hjelpLWU1TdTFHSXpqL1BkTVUyZ0kvbmhzcVhDWHhTNXB3RUNRNS4iLCJpYXQiOjE1NjYxMzMxMjcsImV4cCI6MTU2NjEzMzcyN30.Bz9vhzhnPiePmWJcyfV4hSvhWonDNEED7tJrXduDEiA
 ```
