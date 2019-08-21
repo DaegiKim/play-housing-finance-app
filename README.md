@@ -260,7 +260,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc3dvcmQiOiIkMmEkMTAkTDYxdU9ieTBIRkVkOVNCOWs1US5qdWVINjJkRWFhYlRzN0dLbXdyYS9IWmJBOG8yMWlHY0MiLCJpYXQiOjE1NjYxMzM2NzcsImV4cCI6MTU2NjEzNDI3N30.xQ2p40oe0OQtiA-q1t_fNJt7cgwCsopz20cW_BKSbrc
 
 {
-	"bank":"외환은행"
+  "bank":"외환은행"
 }
 ```
 #### [Response]
