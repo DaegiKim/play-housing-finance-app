@@ -1,5 +1,3 @@
-package error;
-
 import exceptions.FinanceRuntimeException;
 import play.http.HttpErrorHandler;
 import play.mvc.Http.RequestHeader;
