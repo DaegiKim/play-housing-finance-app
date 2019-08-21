@@ -272,12 +272,12 @@ Content-Type: application/json
   "bank": "외환은행",
   "support_amount": [
     {
-      "year": 2015,
-      "amount": 1702
+      "year": 2008,
+      "amount": 78
     },
     {
-      "year": 2017,
-      "amount": 0
+      "year": 2015,
+      "amount": 1702
     }
   ]
 }
