@@ -9,9 +9,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import models.User;
+import org.mindrot.jbcrypt.BCrypt;
 import play.libs.Json;
 import play.mvc.*;
-import utils.BCrypt;
 
 import javax.inject.Inject;
 import java.time.ZoneId;
