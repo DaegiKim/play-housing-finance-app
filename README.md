@@ -1,4 +1,4 @@
-# play-housing-finance-app *(for KakaoPay)*
+# play-housing-finance-app
 
 #### 목차 (Table of Contents)
 1. [설치 및 실행 방법 (How to install and run)](#how-to-install-and-run)
