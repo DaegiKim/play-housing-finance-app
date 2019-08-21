@@ -25,7 +25,7 @@ public class FinanceServiceImpl implements FinanceService {
         if(finances.size() > 0)
             return false;
 
-        try(FileReader fileReader = new FileReader("app/resources/data.csv")) {
+        try(FileReader fileReader = new FileReader("conf/data.csv")) {
             CSVReader csvReader = new CSVReader(fileReader);
 
             String[] header = csvReader.readNext();

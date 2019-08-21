@@ -351,7 +351,7 @@ Content-Length: 52
 
 # 프로젝트 주요 패키지 설명 (Package description)
 ```bash
-$ tree ./app -L 3 -C
+$ tree app conf
 app
 ├── ErrorHandler.java -----------------> 에러 발생 시, json 에러 메시지를 출력하기 위한 커스텀 에러 핸들러
 ├── Module.java -----------------------> 커스텀 DI 바인딩을 위한 모듈 클래스
@@ -367,9 +367,6 @@ app
 │   ├── Bank.java
 │   ├── Finance.java
 │   └── User.java
-├── resources
-│   ├── data.csv ----------------------> 문제에서 주어진 raw 데이터 파일
-│   └── img-db-diagram.png ------------> DB 스키마를 확인할 수 있는 다이어그램 이미지
 ├── services --------------------------> 비즈니스 로직이 정의된 인터페이스
 │   ├── BankService.java
 │   ├── FinanceService.java
@@ -381,6 +378,15 @@ app
 └── views
     ├── index.scala.html
     └── main.scala.html
+conf
+├── application.conf ------------------> Play Framework 설정 파일
+├── data.csv --------------------------> 문제에서 주어진 raw 데이터 파일
+├── evolutions
+│   └── default
+│       └── 1.sql
+├── img-db-diagram.png
+├── logback.xml
+└── routes ----------------------------> HTTP 라우팅 정의 파일 
 ```
 
 ---
@@ -405,6 +411,6 @@ libraryDependencies += "org.mindrot" % "jbcrypt" % "0.4"
 ---
 
 # 데이터베이스 다이어그램 (Database diagram)
-![No image](https://raw.githubusercontent.com/DaegiKim/play-housing-finance-app/master/app/resources/img-db-diagram.png)
+![No image](https://raw.githubusercontent.com/DaegiKim/play-housing-finance-app/master/conf/img-db-diagram.png)
 
 [End Of File]
