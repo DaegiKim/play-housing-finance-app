@@ -1,14 +1,14 @@
 # play-housing-finance-app
 
 #### 목차 (Table of Contents)
-1. [설치 및 실행 방법 (How to install and run)](#how-to-install-and-run)
-2. [REST API 명세서 (REST API Specification)](#rest-api-rest-api-specification)
-    1. [JWT(Json Web Token) 기능](#1-jwtjson-web-token)
-    2. [주택금융 공급현황 분석 서비스](#2)
-    3. [에러 메시지(Error Messages)](#3-error-messages)
-3. [프로젝트 주요 패키지 설명 (Package description)](#package-description)
-4. [사용한 주요 오픈소스 목록 (List of used open source libraries)](#list-of-used-open-source-libraries)
-5. [데이터베이스 다이어그램 (Database diagram)](#database-diagram)
+1. [설치 및 실행 방법 (How to install and run)](#설치-및-실행-방법-how-to-install-and-run)
+2. [REST API 명세서 (REST API Specification)](#rest-api-명세서-rest-api-specification)
+    1. [JWT(Json Web Token) 기능](#1-jwtjson-web-token-기능)
+    2. [주택금융 공급현황 분석 서비스](#2-주택금융-공급현황-분석-서비스)
+    3. [에러 메시지(Error Messages)](#3-에러-메시지error-messages)
+3. [프로젝트 주요 패키지 설명 (Package description)](#프로젝트-주요-패키지-설명-package-description)
+4. [사용한 주요 오픈소스 목록 (List of used open source libraries)](#사용한-주요-오픈소스-목록-list-of-used-open-source-libraries)
+5. [데이터베이스 다이어그램 (Database diagram)](#데이터베이스-다이어그램-database-diagram)
 
 #### 주택 금융 서비스 API 개발
 
