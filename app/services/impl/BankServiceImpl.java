@@ -9,7 +9,6 @@ import org.apache.commons.collections.map.CompositeMap;
 import play.libs.Json;
 import services.BankService;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,25 +107,30 @@ public class BankServiceImpl implements BankService {
 
         List<Finance> finances = Finance.find.query().where().eq("bank_id", bank.id).findList();
 
-        Map<Integer, Long> collect = finances.stream().collect(Collectors.groupingBy(x -> x.year, Collectors.summingLong(x -> x.amount)));
+        Map<Integer, LongSummaryStatistics> collect = finances.stream().collect(
+                Collectors.groupingBy(
+                        x -> x.year,
+                        Collectors.summarizingLong(x -> x.amount)
+                )
+        );
 
-        List<Map.Entry<Integer, Long>> sorted = collect.entrySet().stream().sorted(Comparator.comparingLong(Map.Entry::getValue)).collect(Collectors.toList());
+        List<Map.Entry<Integer, LongSummaryStatistics>> sorted = collect.entrySet().stream().filter(x->x.getKey()<2017).sorted(Comparator.comparingDouble(x -> x.getValue().getAverage())).collect(Collectors.toList());
 
-        Map.Entry<Integer, Long> min = sorted.get(0);
-        Map.Entry<Integer, Long> max = sorted.get(sorted.size()-1);
+        Map.Entry<Integer, LongSummaryStatistics> min = sorted.get(0);
+        Map.Entry<Integer, LongSummaryStatistics> max = sorted.get(sorted.size() - 1);
 
         ArrayNode supportAmount = Json.newArray();
 
         supportAmount.add(
                 Json.newObject()
-                        .put("year", max.getKey())
-                        .put("amount", BigDecimal.valueOf(max.getValue()).divide(BigDecimal.valueOf(12), 0, BigDecimal.ROUND_HALF_UP).longValue())
+                        .put("year", min.getKey())
+                        .put("amount", Math.round(min.getValue().getAverage()))
         );
 
         supportAmount.add(
                 Json.newObject()
-                        .put("year", min.getKey())
-                        .put("amount", BigDecimal.valueOf(min.getValue()).divide(BigDecimal.valueOf(12), 0, BigDecimal.ROUND_HALF_UP).longValue())
+                        .put("year", max.getKey())
+                        .put("amount", Math.round(max.getValue().getAverage()))
         );
 
         resultNode.set("support_amount", supportAmount);
