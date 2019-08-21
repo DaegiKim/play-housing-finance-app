@@ -1,4 +1,15 @@
-# play-housing-finance-app
+# play-housing-finance-app *(for KakaoPay)*
+
+#### 목차 (Table of Contents)
+1. [설치 및 실행 방법 (How to install and run)](#how-to-install-and-run)
+2. [REST API 명세서 (REST API Specification)](#rest-api-rest-api-specification)
+    1. [JWT(Json Web Token) 기능](#1-jwtjson-web-token)
+    2. [주택금융 공급현황 분석 서비스](#2)
+    3. [에러 메시지(Error Messages)](#3-error-messages)
+3. [프로젝트 주요 패키지 설명 (Package description)](#package-description)
+4. [사용한 주요 오픈소스 목록 (List of used open source libraries)](#list-of-used-open-source-libraries)
+5. [데이터베이스 다이어그램 (Database diagram)](#database-diagram)
+
 #### 주택 금융 서비스 API 개발
 
 - 개발환경
@@ -6,10 +17,9 @@
     - Play Framework 2.7.3 (Java)
     - H2 Database (In-Memory) 
     - sbt
-
 - 문제 해결 전략
 	- 금융 기관 목록을 저장하는 Bank 테이블, 기관의 월별 지원 금액을 저장하는 Finance 테이블을 정의하고, 두 테이블이 One-To-Many 관계를 가지도록 함. (하나의 Bank는 다수의 Finance를 가진다.)
-	- 주어진 문제를 해결함에 있어 복잡한 SQL Native Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산 하도록 구현.
+	- 주어진 문제를 해결함에 있어, SQL Native Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산 하도록 구현.
 	- 인증을 위해 JWT을 구현하는 부분은 오픈소스 [jjwt](https://github.com/jwtk/jjwt)와 Play Framework의 기능인 [Action composition](https://www.playframework.com/documentation/2.7.x/JavaActionsComposition)기능을 적용해 해결.
 	- 선택 문제(지원금액 예측)에 대해서는 '과거의 데이터가 이후에도 영향을 미칠것이다'라는 가설을 세우고, 이를 간단하게 구현할 수 있는 시계열(time series)을 적용하기로 결정. 시계열을 Java로 구현한 오픈소스 라이브러리 [com.github.signaflo % timeseries % 0.4](https://github.com/signaflo/java-timeseries)를 사용하여 해결함.
 
@@ -33,7 +43,7 @@ $ sbt run
 
 ---
 
-# API 명세서
+# REST API 명세서 (REST API Specification)
 
 ## 1. JWT(Json Web Token) 기능
 > API 인증을 위해 JWT(Json Web Token)를 이용해서 Token 기반 API 인증 기능을 개발하고 각 API 호출 시에 HTTP Header 에 발급받은 토큰을 가지고 호출하세요.
@@ -46,8 +56,8 @@ Host: localhost:9000
 Content-Type: application/json
 
 {
-	"username":"rmrhtdms",
-	"password":"1234"
+  "username":"rmrhtdms",
+  "password":"1234"
 }
 ```
 #### [Response]
@@ -71,8 +81,8 @@ Host: localhost:9000
 Content-Type: application/json
 
 {
-	"username":"rmrhtdms",
-	"password":"1234"
+  "username":"rmrhtdms",
+  "password":"1234"
 }
 ```
 #### [Response]
@@ -119,6 +129,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJtcmh0ZG1zIiwicGFzc
 #### [Response]
 ```http
 HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "message": "succeed"
+}
 ```
 
 ### 주택금융 공급 금융기관(은행) 목록을 출력하는 API 를 개발하세요.
@@ -137,10 +152,6 @@ Content-Type: application/json
   {
     "id": 1,
     "bank": "주택도시기금"
-  },
-  {
-    "id": 2,
-    "bank": "국민은행"
   },
   ...
   {
@@ -314,4 +325,58 @@ Content-Length: 52
 }
 ```
 
-# WIP ...
+# 프로젝트 주요 패키지 설명 (Package description)
+```bash
+$ tree ./app -L 3 -C
+app
+├── ErrorHandler.java -----------------> 에러 발생 시, json 에러 메시지를 출력하기 위한 커스텀 에러 핸들러
+├── Module.java -----------------------> 커스텀 DI 바인딩을 위한 모듈 클래스
+├── actions
+│   └── SecuredAction.java ------------> HTTP Request 헤더를 읽어 JWT를 검증하는 액션 클래스
+├── controllers -----------------------> 컨트롤러
+│   ├── FinanceController.java
+│   ├── HomeController.java
+│   └── UserController.java
+├── exceptions
+│   └── FinanceRuntimeException.java --> 예외 처리를 위한 Runtime Exception
+├── models ----------------------------> 엔터티 모델
+│   ├── Bank.java
+│   ├── Finance.java
+│   └── User.java
+├── resources
+│   ├── data.csv ----------------------> 문제에서 주어진 raw 데이터 파일
+│   └── img-db-diagram.png ------------> DB 스키마를 확인할 수 있는 다이어그램 이미지
+├── services --------------------------> 비즈니스 로직이 정의된 인터페이스
+│   ├── BankService.java
+│   ├── FinanceService.java
+│   ├── UserService.java
+│   └── impl --------------------------> 비즈니스 로직을 구현한 클래스
+│       ├── BankServiceImpl.java
+│       ├── FinanceServiceImpl.java
+│       └── UserServiceImpl.java
+└── views
+    ├── index.scala.html
+    └── main.scala.html
+```
+
+# 사용한 주요 오픈소스 목록 (List of used open source libraries)
+```bash
+# CSV 파일을 다루기 위한 라이브러리
+libraryDependencies += "com.opencsv"% "opencsv"% "4.1"
+
+# JWT를 Java로 구현한 라이브러리
+libraryDependencies += "io.jsonwebtoken" % "jjwt-api" % "0.10.7"
+libraryDependencies += "io.jsonwebtoken" % "jjwt-impl" % "0.10.7"
+libraryDependencies += "io.jsonwebtoken" % "jjwt-jackson" % "0.10.7"
+
+# 지원금액 예측을 위한 시계열(time series) 라이브러리
+libraryDependencies += "com.github.signaflo" % "timeseries" % "0.4"
+
+# 사용자 암호 인코딩을 위한 bcrypt 라이브러리
+libraryDependencies += "org.mindrot" % "jbcrypt" % "0.4"
+```
+
+# 데이터베이스 다이어그램 (Database diagram)
+![No image](https://raw.githubusercontent.com/DaegiKim/play-housing-finance-app/master/app/resources/img-db-diagram.png)
+
+[End Of File]
