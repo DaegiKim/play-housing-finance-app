@@ -19,18 +19,22 @@
     - sbt
 - 문제 해결 전략
 	- 금융 기관 목록을 저장하는 Bank 테이블, 기관의 월별 지원 금액을 저장하는 Finance 테이블을 정의하고, 두 테이블이 One-To-Many 관계를 가지도록 함. (하나의 Bank는 다수의 Finance를 가진다.)
-	- 주어진 문제를 해결함에 있어, SQL Native Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산 하도록 구현.
+	- 주어진 문제를 해결함에 있어, SQL Native Query를 작성하지 않고, JPA와 ORM, Java Collections, Stream API 등을 이용해 Java 언어 레벨에서 계산하도록 구현.
 	- 인증을 위해 JWT을 구현하는 부분은 오픈소스 [jjwt](https://github.com/jwtk/jjwt)와 Play Framework의 기능인 [Action composition](https://www.playframework.com/documentation/2.7.x/JavaActionsComposition)기능을 적용해 해결.
-	- 선택 문제(지원금액 예측)에 대해서는 '과거의 데이터가 이후에도 영향을 미칠것이다'라는 가설을 세우고, 이를 간단하게 구현할 수 있는 시계열(time series)을 적용하기로 결정. 시계열을 Java로 구현한 오픈소스 라이브러리 [com.github.signaflo % timeseries % 0.4](https://github.com/signaflo/java-timeseries)를 사용하여 해결함.
+	- 선택 문제(지원금액 예측)에 대해서는 '과거의 데이터가 이후에도 영향을 미칠 것이다'라는 가설을 세우고, 이를 간단하게 구현할 수 있는 시계열(time series)을 적용하기로 결정. 시계열을 Java로 구현한 오픈소스 라이브러리 [com.github.signaflo % timeseries % 0.4](https://github.com/signaflo/java-timeseries)를 사용하여 해결함.
 
 ---
 
 # 설치 및 실행 방법 (How to install and run)
+
+> 아래에 두 가지 방법을 제안해 드리니 편하신 방법을 선택해주세요. (Java 8 이상이 설치되어 있다고 가정합니다.)
+
+#### 옵션 1, 소스로부터 실행하는 방법 (sbt에 의존하는 방법)
 ```bash
 # sbt가 없다면 먼저 설치해주세요.
 $ brew install sbt@1
 
-# 프로젝트를 내려 받습니다.
+# 프로젝트를 내려받습니다.
 $ git clone https://github.com/DaegiKim/play-housing-finance-app.git
 
 # 프로젝트 디렉토리로 이동합니다.
@@ -38,6 +42,22 @@ $ cd play-housing-finance-app
 
 # 프로젝트를 실행합니다.
 $ sbt run
+```
+서비스가 정상적으로 구동 되면 http://localhost:9000 으로 접속이 가능합니다.
+
+#### 옵션 2, 바이너리 패키지로부터 실행하는 방법 (sbt에 의존하지 않는 방법)
+```bash
+# 바이너리 패키지를 내려받아 주세요.
+$ curl -L -o play-housing-finance-app-1.0-SNAPSHOT.zip https://github.com/DaegiKim/play-housing-finance-app/releases/download/v1.0/play-housing-finance-app-1.0-SNAPSHOT.zip
+
+# 압축을 해제합니다.
+$ unzip play-housing-finance-app-1.0-SNAPSHOT.zip
+
+# 패키지 디렉토리로 이동합니다.
+$ cd play-housing-finance-app-1.0-SNAPSHOT
+
+# 바이너리 실행 파일을 실행합니다.
+$ ./bin/play-housing-finance-app
 ```
 서비스가 정상적으로 구동 되면 http://localhost:9000 으로 접속이 가능합니다.
 
@@ -325,6 +345,8 @@ Content-Length: 52
 }
 ```
 
+---
+
 # 프로젝트 주요 패키지 설명 (Package description)
 ```bash
 $ tree ./app -L 3 -C
@@ -359,6 +381,8 @@ app
     └── main.scala.html
 ```
 
+---
+
 # 사용한 주요 오픈소스 목록 (List of used open source libraries)
 ```bash
 # CSV 파일을 다루기 위한 라이브러리
@@ -375,6 +399,8 @@ libraryDependencies += "com.github.signaflo" % "timeseries" % "0.4"
 # 사용자 암호 인코딩을 위한 bcrypt 라이브러리
 libraryDependencies += "org.mindrot" % "jbcrypt" % "0.4"
 ```
+
+---
 
 # 데이터베이스 다이어그램 (Database diagram)
 ![No image](https://raw.githubusercontent.com/DaegiKim/play-housing-finance-app/master/app/resources/img-db-diagram.png)
