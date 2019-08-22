@@ -354,6 +354,7 @@ Content-Length: 52
 $ tree app conf
 app
 ├── ErrorHandler.java -----------------> 에러 발생 시, json 에러 메시지를 출력하기 위한 커스텀 에러 핸들러
+├── Filters.java ----------------------> Logging 필터 바인딩을 위한 클래스
 ├── Module.java -----------------------> 커스텀 DI 바인딩을 위한 모듈 클래스
 ├── actions
 │   └── SecuredAction.java ------------> HTTP Request 헤더를 읽어 JWT를 검증하는 액션 클래스
@@ -363,6 +364,8 @@ app
 │   └── UserController.java
 ├── exceptions
 │   └── FinanceRuntimeException.java --> 예외 처리를 위한 Runtime Exception
+├── filters
+│   └── LoggingFilter.java ------------> HTTP Request에 대한 Log를 출력하는 필터 클래스
 ├── models ----------------------------> 엔터티 모델
 │   ├── Bank.java
 │   ├── Finance.java
@@ -385,7 +388,7 @@ conf
 │   └── default
 │       └── 1.sql
 ├── img-db-diagram.png
-├── logback.xml
+├── logback.xml -----------------------> Log 설정 파일
 └── routes ----------------------------> HTTP 라우팅 정의 파일 
 ```
 
