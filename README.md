@@ -29,8 +29,6 @@
 
 # 설치 및 실행 방법 (How to install and run)
 
-> 아래에 두 가지 방법을 제안해 드리니 편하신 방법을 선택해주세요. (Java 8 이상이 설치되어 있다고 가정합니다.)
-
 #### 옵션 1, 소스로부터 실행하는 방법 (sbt에 의존하는 방법)
 ```bash
 # sbt가 없다면 먼저 설치해주세요.
@@ -44,22 +42,6 @@ $ cd play-housing-finance-app
 
 # 프로젝트를 실행합니다.
 $ sbt run
-```
-서비스가 정상적으로 구동 되면 http://localhost:9000 으로 접속이 가능합니다.
-
-#### 옵션 2, 바이너리 패키지로부터 실행하는 방법 (sbt에 의존하지 않는 방법)
-```bash
-# 바이너리 패키지를 내려받아 주세요.
-$ curl -L -o play-housing-finance-app-1.0-SNAPSHOT.zip https://github.com/DaegiKim/play-housing-finance-app/releases/download/v1.0/play-housing-finance-app-1.0-SNAPSHOT.zip
-
-# 압축을 해제합니다.
-$ unzip play-housing-finance-app-1.0-SNAPSHOT.zip
-
-# 패키지 디렉토리로 이동합니다.
-$ cd play-housing-finance-app-1.0-SNAPSHOT
-
-# 바이너리 실행 파일을 실행합니다.
-$ ./bin/play-housing-finance-app
 ```
 서비스가 정상적으로 구동 되면 http://localhost:9000 으로 접속이 가능합니다.
 
